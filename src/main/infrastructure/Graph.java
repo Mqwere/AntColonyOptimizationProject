@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class Graph
 {
@@ -70,6 +71,20 @@ public class Graph
 	{
 		if(!input.contains(startingVertex) || input.get(0).equals(startingVertex)) return input;
 		
+		int lastIdx = input.size()-1;
+		
+		boolean inputIsClosedLoop = input.size() > 1 && input.get(0).equals(input.get(lastIdx));
+		if(inputIsClosedLoop) { input.remove(lastIdx); }
+		
+		ArrayList<Vertex> output = shuffleAroundToHaveFirstVertexBeFirst( input );
+		
+		if(inputIsClosedLoop) output.add(startingVertex);
+		
+		return output;
+	}
+
+	private ArrayList<Vertex> shuffleAroundToHaveFirstVertexBeFirst( ArrayList<Vertex> input )
+	{
 		ArrayList<Vertex> output = new ArrayList<>();
 		int idx = 0;
 		boolean mayCopy = false;
@@ -108,6 +123,12 @@ public class Graph
 		return 
 				Objects.equals(startingVertex, other.startingVertex) && 
 				Objects.equals( vertices, other.vertices );
+	}
+	
+	public static Graph parse(String input)
+	{
+		Pattern pattern = Pattern.compile("([1-9][0-9]*)(\\.[0-9]+)?");
+		Matcher matcher = pattern.matcher(input);
 	}
 
 	public static Graph createGraphFromIdxNumber(int idxNumber)

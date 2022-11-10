@@ -1,17 +1,14 @@
 package main;
 
-import java.util.ArrayList;
-
 import main.infrastructure.AntColony;
 import main.infrastructure.Graph;
-import main.infrastructure.Vertex;
 
 public class AntColonyOptimizationProject
 {
 	private static final int INDEX_NUMBER = 6799;
 	public static final double MIN_DECISION_VALUE = 0.1D;
 	
-	private static final boolean SHOULD_LOG = true;
+	public static final boolean SHOULD_LOG = false;
 	
 	public static void main(String[] args)
 	{
@@ -19,17 +16,14 @@ public class AntColonyOptimizationProject
 		
 		AntColony colony =  new AntColony
 										.Builder(graph)
-											.withWeightOfEdgeLength(5D)
+											.withWeightOfEdgeLength(10D)
 											.withWeightOfPheromoneValue(1D)
-											.withPheromoneNominator(3D)
+											.withPheromoneNominator(1D)
 											.withPheromoneEvaporationRatio(0.5D)
 											.withNumberOfAnts(2)
 										.build();
 		
-		ArrayList<Vertex> output = colony.performANumberOfFullPasses(2);
-		System.out.println(
-			AntColony.trailToString(output)
-		);
+		colony.performANumberOfFullPasses(1);
 	}
 	
 	public static void log(Object message, Object... args)

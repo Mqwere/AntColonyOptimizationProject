@@ -6,18 +6,18 @@ import java.util.Objects;
 
 public class Vertex
 {
-	public final int Y, X;
+	public final double Y, X;
 	public HashMap<Vertex, Edge> outgoingEdges = new HashMap<>();
 	
 	public Character identifier = 'Ø';
 	
-	public Vertex(int Y, int X)
+	public Vertex(double Y, double X)
 	{
 		this.Y = Y;
 		this.X = X;		
 	}
 	
-	public Vertex(int Y, int X, Character identifier)
+	public Vertex(double Y, double X, Character identifier)
 	{
 		this.Y = Y;
 		this.X = X;		
@@ -36,9 +36,14 @@ public class Vertex
 		return output;
 	}
 	
-	private void setEdgeToVertex(Vertex destination, Edge edge)
+	public void setEdgeToVertex(Vertex destination, Edge edge)
 	{
 		outgoingEdges.put(destination, edge );
+	}
+	
+	public void createEdgesToAndFromVertex(Vertex destination)
+	{
+		setEdgeToVertex(destination, destination.createEdgeToVertex(this)); 
 	}
 	
 	@Override
@@ -62,7 +67,7 @@ public class Vertex
 	@Override
 	public String toString()
 	{
-		return String.format("[%s (%d %d)]", identifier, Y, X);
+		return String.format("%s (%.1f %.1f)", identifier, Y, X);
 	}
 
 	public static HashSet<Edge> createAllEdgesBetweenVertices(Vertex... vertices)

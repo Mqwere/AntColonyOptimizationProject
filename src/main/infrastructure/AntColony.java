@@ -54,15 +54,15 @@ public class AntColony
 		edgesAwaitingPheromoneUpdate.add(edge);
 	}
 	
-	public ArrayList<Vertex> performANumberOfFullPasses(int numberOfPasses)
+	public void performANumberOfFullPasses(int numberOfPasses)
 	{
-		if(numberOfPasses <= 0) return null;
+		if(numberOfPasses <= 0) return;
 		logln(">>> Starting TSP optimisation (%d passes, %d ants, %d vertices).", numberOfPasses, numberOfAnts, graph.getKeys().size());
 		IntStream.range(0, numberOfPasses).forEach( i -> {
 			logln(">> Beginning pass %d/%d.", i+1, numberOfPasses);
 			performOneFullPass();
 		});
-		return currentBestTrail;
+		if(!SHOULD_LOG) System.out.printf("%s, length: %f", trailToString(currentBestTrail), bestTrailLength);
 	}
 	
 	public ArrayList<Vertex> performOneFullPass()
@@ -168,14 +168,14 @@ public class AntColony
 	{
 		if(input == null) return "N/A";
 		
-		StringBuilder output = new StringBuilder("{");
+		StringBuilder output = new StringBuilder("<<");
 		
 		input.stream().forEach
 		(
-			v -> output.append(" ").append(v)
+			v -> output.append(" ").append(v).append(" >")
 		);
 		
-		output.append(" }");
+		output.append(">");
 		
 		return output.toString();
 	}

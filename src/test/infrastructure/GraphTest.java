@@ -20,11 +20,19 @@ public class GraphTest
 			D = new Vertex(6,7),
 			E = new Vertex(5,2);
 		
-		A.createEdgeToVertex(B); A.createEdgeToVertex(C); A.createEdgeToVertex(D); A.createEdgeToVertex(E);
-		B.createEdgeToVertex(A); B.createEdgeToVertex(C); B.createEdgeToVertex(D); B.createEdgeToVertex(E);
-		C.createEdgeToVertex(A); C.createEdgeToVertex(B); C.createEdgeToVertex(D); C.createEdgeToVertex(E);
-		D.createEdgeToVertex(A); D.createEdgeToVertex(B); D.createEdgeToVertex(C); D.createEdgeToVertex(E);
-		E.createEdgeToVertex(A); E.createEdgeToVertex(B); E.createEdgeToVertex(C); E.createEdgeToVertex(D);
+		B.createEdgesToAndFromVertex(A); 
+		
+		C.createEdgesToAndFromVertex(A); 
+		C.createEdgesToAndFromVertex(B);
+		
+		D.createEdgesToAndFromVertex(A); 
+		D.createEdgesToAndFromVertex(B); 
+		D.createEdgesToAndFromVertex(C);
+		
+		E.createEdgesToAndFromVertex(A); 
+		E.createEdgesToAndFromVertex(B); 
+		E.createEdgesToAndFromVertex(C); 
+		E.createEdgesToAndFromVertex(D);
 		
 		expectedGraph.add('A', A);
 		expectedGraph.add('B', B);
