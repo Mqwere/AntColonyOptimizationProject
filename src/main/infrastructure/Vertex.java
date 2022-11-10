@@ -1,6 +1,8 @@
 package main.infrastructure;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Objects;
 
 public class Vertex
 {
@@ -13,11 +15,22 @@ public class Vertex
 		this.X = X;		
 	}
 	
-	public void createEdgeToVertex(Vertex destination)
+	public Edge createEdgeToVertex(Vertex destination)
 	{
-		if(destination.equals(this)) return;
-		
-		outgoingEdges.putIfAbsent(destination, new Edge(this, destination) );
+		Edge output;
+		outgoingEdges.putIfAbsent(destination, output = new Edge(this, destination) );
+		return output;
+	}
+	
+	private void setEdgeToVertex(Vertex destination, Edge edge)
+	{
+		outgoingEdges.put(destination, edge );
+	}
+	
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash( Y, X );
 	}
 	
 	@Override
@@ -32,9 +45,16 @@ public class Vertex
 		return v.X == this.X && v.Y == this.Y;
 	}
 	
-	public static void createAllEdgesBetweenVertices(Vertex... vertices)
+	@Override
+	public String toString()
 	{
-		if(vertices.length <= 1) return;
+		return String.format("(%d %d)", Y, X);
+	}
+
+	public static HashSet<Edge> createAllEdgesBetweenVertices(Vertex... vertices)
+	{
+		HashSet<Edge> output = new HashSet<>();
+		if(vertices.length <= 1) return output;
 		
 		for(int i = 0; i < vertices.length-1; i++)
 		{
@@ -42,11 +62,15 @@ public class Vertex
 			for(int z = i + 1; z < vertices.length; z++)
 			{
 				Vertex destination = vertices[z];
-				source.createEdgeToVertex(destination);
-				destination.createEdgeToVertex(source);
+				
+				Edge edge = source.createEdgeToVertex(destination);
+				destination.setEdgeToVertex(source, edge);
+				
+				output.add(edge);
 			}
 		}
 		
+		return output;
 	}
 
 }
