@@ -2,16 +2,16 @@ package main.infrastructure;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.IntStream;
+
+import static main.AntColonyOptimizationProject.*;
 
 public class AntColony
-{
-	private static final double MIN_DECISION_VALUE = 0.5D;
-	
+{	
 	private final Graph graph;
 	
 	private final double weightOfEdgeLength;
@@ -23,9 +23,7 @@ public class AntColony
 	
 	private final int numberOfAnts;
 	private ArrayList<Ant> ants = new ArrayList<>();
-	
-	private final int numberOfFullPasses;
-	
+		
 	private ArrayList<Edge> edgesAwaitingPheromoneUpdate = new ArrayList<>();
 	
 	private ArrayList<Vertex> currentBestTrail;
@@ -45,23 +43,46 @@ public class AntColony
 		
 		this.numberOfAnts = builder.numberOfAnts;
 		
-		this.numberOfFullPasses = builder.numberOfFullPasses;
-		
 		for(int i = 0; i < numberOfAnts; i++)
 		{
 			ants.add(new Ant(this));
 		}
-		
-		setAntsUp();
 	}
 	
-	public void requestPheromoneUpdateForEdge(Edge edge)
+	private void requestPheromoneUpdateForEdge(Edge edge)
 	{
 		edgesAwaitingPheromoneUpdate.add(edge);
 	}
 	
+	public ArrayList<Vertex> performANumberOfFullPasses(int numberOfPasses)
+	{
+		if(numberOfPasses <= 0) return null;
+		logln(">>> Starting TSP optimisation (%d passes, %d ants, %d vertices).", numberOfPasses, numberOfAnts, graph.getKeys().size());
+		IntStream.range(0, numberOfPasses).forEach( i -> {
+			logln(">> Beginning pass %d/%d.", i+1, numberOfPasses);
+			performOneFullPass();
+		});
+		return currentBestTrail;
+	}
+	
+	public ArrayList<Vertex> performOneFullPass()
+	{
+		int passLength = graph.getKeys().size();
+		setAntsUp();
+		
+		IntStream.range(0, passLength).forEach( i -> {
+			logln("> Beginning iteration %d of the current pass.", i+1);
+			moveAnts();
+			updatePheromones();
+			updateBestSolution();
+		});
+		
+		return currentBestTrail;
+	}
+	
 	private void setAntsUp()
 	{
+		logln("Beginning ants setup sequence.");
 		Set<Character> graphKeys = graph.getKeys();
 		int numberOfKeys = graphKeys.size();
 		Character[] keys = new Character[numberOfKeys];
@@ -71,23 +92,35 @@ public class AntColony
 		
 		ants.forEach
 		(
-			(a) -> a.beginTrailAt
-			(
-				graph.get
+			(a) -> 
+			{
+				Character key;
+				a.beginTrailAt
 				(
-					keys[rand.nextInt(numberOfKeys)]
-				)
-			)
+					graph.get
+					(
+						key = keys[rand.nextInt(numberOfKeys)]
+					)
+				);
+				logln("Ant-%d beginning at %s.", a.ID, key);
+			}
 		);
+		logln("Ants setup sequence completed.");
 	}
 	
 	private void moveAnts()
 	{
+		logln("Beginning ants movement sequence.");
+		
 		ants.forEach(Ant::moveToNextVertex);
+		
+		logln("Ants movement sequence completed.");
 	}
 	
 	private void updatePheromones()
 	{
+		logln("Beginning pheromone evaporation.");
+		
 		graph.getEdges()
 			.stream()
 			.forEach
@@ -98,6 +131,8 @@ public class AntColony
 				}
 			);
 		
+		logln("Pheromone evaporation completed. Now applying pheromone updates.");
+		
 		edgesAwaitingPheromoneUpdate
 			.stream()
 			.forEach
@@ -107,12 +142,15 @@ public class AntColony
 					edge.pheromoneValue += (pheromoneNominator / edge.length);
 				}
 			);
-		
+
 		edgesAwaitingPheromoneUpdate.clear();
+		
+		logln("Pheromone update completed.");
 	}
 	
 	private void updateBestSolution()
 	{
+		logln("Now updating best solution.");
 		currentBestTrail = null;
 		for(Ant a: ants)
 		{
@@ -122,12 +160,29 @@ public class AntColony
 				bestTrailLength = a.getCurrentTrailLength();
 			}
 		}
+		currentBestTrail = graph.makeListStartFromFirstVertex(currentBestTrail);
+		logln("Best solution update completed. Now the best solution is:\n%s, length: %f", trailToString(currentBestTrail), bestTrailLength);
 	}
 	
-	public static class Ant
+	public static String trailToString(ArrayList<Vertex> input)
 	{
-		private final double weightOfEdgeLength;
-		private final double weightOfPheromoneValue;
+		if(input == null) return "N/A";
+		
+		StringBuilder output = new StringBuilder("{");
+		
+		input.stream().forEach
+		(
+			v -> output.append(" ").append(v)
+		);
+		
+		output.append(" }");
+		
+		return output.toString();
+	}
+	
+	private static class Ant
+	{
+		private static int antCounter = 1;
 		
 		private ArrayList<Vertex> trail;
 		
@@ -136,17 +191,18 @@ public class AntColony
 		private Vertex firstVertex;
 		private Vertex nextVertex;
 		
-		public Ant(AntColony colony)
+		private final int ID;
+		
+		private Ant(AntColony colony)
 		{
-			this.myColony = colony;
+			this.ID = antCounter++;
 			
-			this.weightOfEdgeLength = colony.weightOfEdgeLength;
-			this.weightOfPheromoneValue = colony.weightOfPheromoneValue;
+			this.myColony = colony;
 						
 			this.trail = new ArrayList<>();
 		}
 		
-		public double getCurrentTrailLength()
+		private double getCurrentTrailLength()
 		{
 			double length = 0d;
 			
@@ -162,7 +218,7 @@ public class AntColony
 			return length;
 		}
 		
-		public void decideOnNextMove()
+		private void decideOnNextMove()
 		{
 			Vertex currentVertex = nextVertex;
 			
@@ -175,15 +231,15 @@ public class AntColony
 			nextVertex = output.orElse(firstVertex);
 		}
 				
-		public void beginTrailAt(Vertex vertex)
+		private void beginTrailAt(Vertex vertex)
 		{	
 			this.trail = new ArrayList<>();
 			nextVertex = vertex;
+			firstVertex = vertex;
 			moveToNextVertex();
-			decideOnNextMove();
 		}
 		
-		public ArrayList<Vertex> getClonedTrail()
+		private ArrayList<Vertex> getClonedTrail()
 		{
 			ArrayList<Vertex> clone = new ArrayList<>();
 			
@@ -195,19 +251,22 @@ public class AntColony
 
 		private void moveToNextVertex()
 		{
-			if(firstVertex == null) firstVertex = nextVertex;
 			addToTrail( nextVertex );
 			decideOnNextMove();
 		}
 
 		private void addToTrail( Vertex vertex )
 		{
-			if(trail.size() > 0)
+			Optional<Vertex> previousVertex = trail.size() > 0 ? Optional.of( trail.get( trail.size( ) - 1 ) ) : Optional.empty();
+			
+			if(previousVertex.isPresent())
 			{
-				myColony.requestPheromoneUpdateForEdge(trail.get(trail.size()-1).outgoingEdges.get(vertex));
+				myColony.requestPheromoneUpdateForEdge(previousVertex.get().outgoingEdges.get(vertex));
 			}
 			
 			trail.add( vertex );
+			
+			if(previousVertex.isPresent()) logln("Ant-%d %s -> %s", ID, previousVertex.get().toString(), vertex.toString());
 		}
 
 		private Optional<Vertex> getPotentialOutputValue( HashMap<Vertex, Double> decisionMap, Double decisionValue )
@@ -261,8 +320,8 @@ public class AntColony
 						Vertex ver = entry.getKey();
 						Edge edge = entry.getValue();
 						Double edgeValue = 
-								(MIN_DECISION_VALUE + Math.pow(edge.pheromoneValue, weightOfPheromoneValue)) 
-								/ Math.pow(edge.length, weightOfEdgeLength);
+								(MIN_DECISION_VALUE + Math.pow(edge.pheromoneValue, myColony.weightOfPheromoneValue)) 
+								/ Math.pow(edge.length, myColony.weightOfEdgeLength);
 						
 						decisionMap.compute(ver, (key, value) -> value == null ? edgeValue : value + edgeValue );
 					}
@@ -275,14 +334,12 @@ public class AntColony
 	{
 		private Graph graph;
 		
-		private double weightOfEdgeLength = 2D;
-		private double weightOfPheromoneValue = 5D;
+		private double weightOfEdgeLength = 5D;
+		private double weightOfPheromoneValue = 1D;
 		private double pheromoneNominator = 1D;
 		private double pheromoneEvaporationRatio = 0.5D;
 		
 		private int numberOfAnts = 5;
-
-		private int numberOfFullPasses = 1;
 		
 		public Builder(Graph graph) 
 		{
@@ -319,11 +376,6 @@ public class AntColony
 			return this;
 		}
 
-		public Builder withNumberOfFullPasses(int numberOfFullPasses)
-		{
-			this.numberOfFullPasses = numberOfFullPasses;
-			return this;
-		}
 		public AntColony build()
 		{
 			return new AntColony(this);

@@ -1,12 +1,11 @@
 package main.infrastructure;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class Graph
 {
@@ -67,6 +66,29 @@ public class Graph
 		return vertices.keySet();
 	}
 	
+	public ArrayList<Vertex> makeListStartFromFirstVertex(ArrayList<Vertex> input)
+	{
+		if(!input.contains(startingVertex) || input.get(0).equals(startingVertex)) return input;
+		
+		ArrayList<Vertex> output = new ArrayList<>();
+		int idx = 0;
+		boolean mayCopy = false;
+		
+		while(output.size() != input.size())
+		{
+			int normalizedIdx = idx % input.size();
+			Vertex currentVertex = input.get(normalizedIdx);
+			if (mayCopy || 
+				(mayCopy = currentVertex.equals(startingVertex)))
+			{
+				output.add(input.get(normalizedIdx));
+			}
+			idx++;
+		}
+		
+		return output;
+	}
+	
 	@Override
 	public int hashCode()
 	{
@@ -91,11 +113,11 @@ public class Graph
 	public static Graph createGraphFromIdxNumber(int idxNumber)
 	{
 		Graph output = new Graph(
-			idxNumber % 2 == 0 ? new Vertex( 2, 3 ) : new Vertex( 1, 2 ), //A
-			idxNumber % 2 == 0 ? new Vertex( 5, 1 ) : new Vertex( 3, 1 ), //B
-			idxNumber % 2 == 0 ? new Vertex( 4, 7 ) : new Vertex( 3, 6 ), //C
-			idxNumber % 2 == 0 ? new Vertex( 7, 7 ) : new Vertex( 6, 7 ), //D
-			idxNumber % 2 == 0 ? new Vertex( 7, 3 ) : new Vertex( 5, 2 )  //E
+			idxNumber % 2 == 0 ? new Vertex( 2, 3, 'A' ) : new Vertex( 1, 2, 'A' ),
+			idxNumber % 2 == 0 ? new Vertex( 5, 1, 'B' ) : new Vertex( 3, 1, 'B' ),
+			idxNumber % 2 == 0 ? new Vertex( 4, 7, 'C' ) : new Vertex( 3, 6, 'C' ),
+			idxNumber % 2 == 0 ? new Vertex( 7, 7, 'D' ) : new Vertex( 6, 7, 'D' ),
+			idxNumber % 2 == 0 ? new Vertex( 7, 3, 'E' ) : new Vertex( 5, 2, 'E' )
 		);
 		
 		output.setStartingVertex(

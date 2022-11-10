@@ -9,10 +9,24 @@ public class Vertex
 	public final int Y, X;
 	public HashMap<Vertex, Edge> outgoingEdges = new HashMap<>();
 	
+	public Character identifier = 'Ø';
+	
 	public Vertex(int Y, int X)
 	{
 		this.Y = Y;
 		this.X = X;		
+	}
+	
+	public Vertex(int Y, int X, Character identifier)
+	{
+		this.Y = Y;
+		this.X = X;		
+		this.identifier = identifier;
+	}
+	
+	public void setIdentifier(Character identifier)
+	{
+		this.identifier = identifier;
 	}
 	
 	public Edge createEdgeToVertex(Vertex destination)
@@ -48,7 +62,7 @@ public class Vertex
 	@Override
 	public String toString()
 	{
-		return String.format("(%d %d)", Y, X);
+		return String.format("[%s (%d %d)]", identifier, Y, X);
 	}
 
 	public static HashSet<Edge> createAllEdgesBetweenVertices(Vertex... vertices)
