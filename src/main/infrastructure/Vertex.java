@@ -9,7 +9,7 @@ public class Vertex
 	public final double Y, X;
 	public HashMap<Vertex, Edge> outgoingEdges = new HashMap<>();
 	
-	public Character identifier = 'Ø';
+	public String identifier = "";
 	
 	public Vertex(double Y, double X)
 	{
@@ -17,14 +17,14 @@ public class Vertex
 		this.X = X;		
 	}
 	
-	public Vertex(double Y, double X, Character identifier)
+	public Vertex(double Y, double X, String identifier)
 	{
 		this.Y = Y;
 		this.X = X;		
 		this.identifier = identifier;
 	}
 	
-	public void setIdentifier(Character identifier)
+	public void setIdentifier(String identifier)
 	{
 		this.identifier = identifier;
 	}

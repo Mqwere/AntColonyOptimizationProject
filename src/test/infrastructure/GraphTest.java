@@ -34,11 +34,11 @@ public class GraphTest
 		E.createEdgesToAndFromVertex(C); 
 		E.createEdgesToAndFromVertex(D);
 		
-		expectedGraph.add('A', A);
-		expectedGraph.add('B', B);
-		expectedGraph.add('C', C);
-		expectedGraph.add('D', D);
-		expectedGraph.add('E', E);
+		expectedGraph.add("A", A);
+		expectedGraph.add("B", B);
+		expectedGraph.add("C", C);
+		expectedGraph.add("D", D);
+		expectedGraph.add("E", E);
 		
 		expectedGraph.setStartingVertex(E);
 		
