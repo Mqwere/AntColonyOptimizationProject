@@ -11,7 +11,8 @@ public class EdgeTest
 	@Test
 	public void edgeCalculatesValidLengths()
 	{
-		Edge edge = new Edge(new Vertex(0,0), new Vertex(3,4));
+		Edge 
+		edge = new Edge(new Vertex(0,0), new Vertex(3,4));
 		Assertions.assertEquals(5, edge.length);
 
 		edge = new Edge(new Vertex(0,0), new Vertex(5,12));

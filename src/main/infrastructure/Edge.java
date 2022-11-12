@@ -34,6 +34,12 @@ public class Edge
 		return Objects.hash(vertex1, vertex2, length);
 	}
 	
+	@Override
+	public String toString()
+	{
+		return String.format("(%s <-> %s)", vertex1.identifier, vertex2.identifier);
+	}
+	
 	private void calculateLength()
 	{
 		double 

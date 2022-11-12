@@ -27,7 +27,7 @@ public class AntColonyOptimizationProject
 	
 	public static void main(String[] args)
 	{
-		//args = new String[] {};
+		//args = new String[] {"-v"};
 		
 		handler = new ArgumentsHandler(args);
 		

@@ -122,11 +122,23 @@ public class AntColony
 		
 		graph.getEdges()
 			.stream()
+			.filter
+			(
+				edge -> edge.pheromoneValue > 0
+			)
 			.forEach
 			(
-				(edge) -> 
+				edge -> 
 				{
+					double 
+						start = edge.pheromoneValue, 
+						end;
 					edge.pheromoneValue *= (1 - pheromonePercentileEvaporationRate);
+					end = edge.pheromoneValue;
+					log(
+						"\t\t\t\tEvaporating pheromone on edge %s: %f -> %f",
+						edge, start, end
+					);
 				}
 			);
 		
@@ -138,7 +150,10 @@ public class AntColony
 			(
 				(edge) -> 
 				{
-					edge.pheromoneValue += (pheromoneNominator / edge.length);
+					double addition = (pheromoneNominator / edge.length);
+					edge.pheromoneValue += addition;
+					log("\t\t\t\tLeaving %f pheromone at edge %s.", 
+						addition, edge);
 				}
 			);
 
@@ -147,7 +162,7 @@ public class AntColony
 	
 	private void updateBestSolution()
 	{
-		log("\t\t\tUpdating best solution.");
+		//log("\t\t\tUpdating best solution.");
 		currentBestTrail = null;
 		for(Ant a: ants)
 		{
@@ -159,7 +174,7 @@ public class AntColony
 		}
 		currentBestTrail = graph.makeListStartFromFirstVertex(currentBestTrail);
 		log(
-			"\t\t\tlength: %f,\n"
+			"\t\t\tBest solution updated (length: %f):\n"
 			+ "\t\t\t%s", 
 			bestTrailLength, 
 			trailToString(currentBestTrail)
@@ -224,11 +239,20 @@ public class AntColony
 		{
 			Vertex currentVertex = nextVertex;
 			
-			HashMap<Vertex, Double> decisionMap = createDecisionMap( currentVertex );
-						
-			Double decisionValue = getSumOfDecisionValues( decisionMap ) * new Random().nextDouble();
+			Optional<Vertex> output;
 			
-			Optional<Vertex> output = getPotentialOutputValue( decisionMap, decisionValue );
+			HashMap<Vertex, Double> decisionMap = createDecisionMap( currentVertex );
+			
+			if(decisionMap.size() == 1)
+			{
+				output = decisionMap.keySet().stream().findAny();
+			}
+			else
+			{
+				Double decisionValue = getSumOfDecisionValues( decisionMap ) * new Random().nextDouble();
+				
+				output = getPotentialOutputValue( decisionMap, decisionValue );
+			}
 
 			nextVertex = output.orElse(firstVertex);
 		}
