@@ -27,9 +27,12 @@ public class AntColony
 	private ArrayList<Ant> ants = new ArrayList<>();
 		
 	private ArrayList<Edge> edgesAwaitingPheromoneUpdate = new ArrayList<>();
+
+	private ArrayList<Vertex> globalBestTrail = null;
+	private double globalBestTrailLength;
 	
-	private ArrayList<Vertex> currentBestTrail;
-	private double bestTrailLength;
+	private ArrayList<Vertex> currentBestTrail = null;
+	private double currentBestTrailLength;
 	
 	
 	private AntColony(AntColony.Builder builder)
@@ -63,8 +66,9 @@ public class AntColony
 		IntStream.range(0, numberOfPasses).forEach( i -> {
 			log("\tBeginning pass %d/%d.", i+1, numberOfPasses);
 			performOneFullPass();
+			updateGlobalBestSolution();
 		});
-		checklessLog("%s, length: %f", trailToString(currentBestTrail), bestTrailLength);
+		checklessLog("%s, length: %f", trailToString(globalBestTrail), globalBestTrailLength);
 	}
 	
 	public ArrayList<Vertex> performOneFullPass()
@@ -162,23 +166,38 @@ public class AntColony
 	
 	private void updateBestSolution()
 	{
-		//log("\t\t\tUpdating best solution.");
 		currentBestTrail = null;
 		for(Ant a: ants)
 		{
-			if(currentBestTrail == null || a.getCurrentTrailLength() < bestTrailLength) 
+			if(currentBestTrail == null || a.getCurrentTrailLength() < currentBestTrailLength) 
 			{
 				currentBestTrail = a.getClonedTrail();
-				bestTrailLength = a.getCurrentTrailLength();
+				currentBestTrailLength = a.getCurrentTrailLength();
 			}
 		}
 		currentBestTrail = graph.makeListStartFromFirstVertex(currentBestTrail);
 		log(
 			"\t\t\tBest solution updated (length: %f):\n"
-			+ "\t\t\t%s", 
-			bestTrailLength, 
+		+	"\t\t\t%s", 
+			currentBestTrailLength, 
 			trailToString(currentBestTrail)
 		);
+	}
+	
+	private void updateGlobalBestSolution()
+	{
+		if(globalBestTrail == null || currentBestTrailLength < globalBestTrailLength) 
+		{
+			globalBestTrail = currentBestTrail;
+			globalBestTrailLength = currentBestTrailLength;
+
+			log(
+				"\t\tBest global solution updated (length: %f):\n"
+				+ "\t\t%s", 
+				currentBestTrailLength, 
+				trailToString(globalBestTrail)
+			);
+		}
 	}
 	
 	public static String trailToString(ArrayList<Vertex> input)
