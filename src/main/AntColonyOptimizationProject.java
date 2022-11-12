@@ -26,9 +26,7 @@ public class AntColonyOptimizationProject
 	public static ArgumentsHandler handler;
 	
 	public static void main(String[] args)
-	{
-		args = new String[] {"-fv", "D:\\graph.txt"};
-		
+	{		
 		handler = new ArgumentsHandler(args);
 		
 		if(handler.isHelpRequired())
@@ -39,20 +37,12 @@ public class AntColonyOptimizationProject
 		
 		Graph graph = getGraphUsingArgumentsReceived();
 		
-		graph.setStartingVertex(graph.get("2"));
-		
 		AntColony colony =  new AntColony
 										.Builder(graph)
-//											.withWeightOfEdgeLength(5D)
-//											.withWeightOfPheromoneValue(2D)
-//											.withPheromoneNominator(10D)
-//											.withPheromoneEvaporationRatio(0.5D)
-//											.withNumberOfAnts(5)
 											.withLiteBuilder(handler.getColonyProperties())
 										.build();
 		
 		colony.performANumberOfFullPasses(handler.getColonyProperties().numberOfFullPasses);
-		//colony.performANumberOfFullPasses(1);
 		
 		logDump();
 	}
